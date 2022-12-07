@@ -25,7 +25,7 @@ const VIEWS = [
 ]
 
 
-let currentRoute = "/coloring";
+let currentRoute = "/clock";
 
 
 const pad = new Launchpad();

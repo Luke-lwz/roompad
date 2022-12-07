@@ -103,6 +103,7 @@ class ToolbarStateManager {
 
     // SET
     setToolbar(toolbar) { // 1 dimensional array of exact length 8  // data can be either: obj = {id: 3, onClick: () => {}} || just an integer with the id;
+        if (!toolbar) return;
         let newToolbar = []
 
         for (let y = 0; y <= 7; y++) {
