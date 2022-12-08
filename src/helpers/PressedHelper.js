@@ -16,4 +16,12 @@ export function PressedInToolbar(k, callback) {
 }
 
 
+export function PressedInNavbar(k, callback) {
+    if (k.y < 8 || k.x >= 8) return
+    k.down = k.pressed;
+    k.up = !k.pressed;
+    return callback(k)
+}
+
+
 export default PressedInView

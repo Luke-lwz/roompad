@@ -192,7 +192,7 @@ class ToolbarStateManager {
         this.pad.col(shape.pad, key);
     }
 
-    async render() { // renders the current internal state onto pad
+    render() { // renders the current internal state onto pad
         const arr = [];
 
         const toolbar = this.toolbar;

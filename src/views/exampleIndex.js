@@ -6,7 +6,7 @@ class ExampleView {
 
     mount() {
         this.state.setGrid(this.state.getPrefabGrid({ id: 0, onClick: (data) => this.onClick(data) })) // fills grid with clickable keys
-        this.toolbar.setGrid(this.toolbar.getPrefabToolbar({ id: 0, onClick: (data) => this.onToolbarClick(data) })) // fills toolbar with clickable keys
+        this.toolbar.setToolbar(this.toolbar.getPrefabToolbar({ id: 0, onClick: (data) => this.onToolbarClick(data) })) // fills toolbar with clickable keys
     }
 
     onSecondInterval() {
@@ -24,6 +24,10 @@ class ExampleView {
     onToolbarClick(key) { // key = coordinates, down, up && shape
 
     }
+
+    // code
+
+    
 }
 
 export default ExampleView

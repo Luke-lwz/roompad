@@ -21,7 +21,8 @@
     "@vliegwerk/novation": "^1.0.1",
     "launchpad-mini": "^2.3.3",
     "midi": "^2.0.0",
-    "node-fetch": "^3.3.0"
+    "node-fetch": "^3.3.0",
+    "node-localstorage": "^2.2.1"
   },
   "type": "module"
 }

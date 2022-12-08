@@ -1,4 +1,4 @@
-
+import localStorage from "../localStorage/localStorage.js";
 
 class StateManager {
     constructor(pad) {
@@ -94,6 +94,9 @@ class StateManager {
         this.grid = grid;
 
 
+        this.storageAddress = null;
+
+
 
 
         // intervals
@@ -106,12 +109,14 @@ class StateManager {
     }
 
 
+
+
     // EVENTS
     onClick(k) {
         const state = this.getKey(k);
         if (state?.onClick) {
             let shape = this.getShapeFromId(state?.id);
-            state.onClick({ ...k, shape, set: (data) => this.setKey(k, data), setId: (id) => this.setKeyId(k, id)});
+            state.onClick({ ...k, shape, set: (data) => this.setKey(k, data), setId: (id) => this.setKeyId(k, id) });
         }
     }
 
@@ -119,7 +124,15 @@ class StateManager {
 
 
     // SET
-    setGrid(grid) { // 2 Dimensional array exact length in all directions = 8, data can be either: obj = {id: 3, onClick: () => {}} || just an integer with the id;
+    setGrid(grid, options = {}) { // 2 Dimensional array exact length in all directions = 8, data can be either: obj = {id: 3, onClick: () => {}} || just an integer with the id;
+        if (!grid) return;
+        const { restore } = options; // if restore then it will replace all ids without affecting onClick
+
+        var storage = null;
+        if (restore) {
+            storage = this.getStorage();
+        }
+
         let newGrid = [
             [], [], [], [], [], [], [], [],
         ]
@@ -129,9 +142,14 @@ class StateManager {
                 let data = grid[x][y];
                 if (data) {
                     if (typeof (data) === "number") data = { id: data };
-                    newGrid[x][y] = { id: data.id, onClick: data.onClick };
+                    newGrid[x][y] = {
+                        id: (storage && storage?.[x]?.[y] ? storage[x][y].id : data.id),
+                        onClick: data.onClick
+                    };
                 } else { // if no data exists then render "off"
-                    newGrid[x][y] = { id: this.shapes[0].id };
+                    newGrid[x][y] = {
+                        id: (storage && storage?.[x]?.[y] ? storage[x][y].id : this.shapes[0].id)
+                    };
                 }
             }
 
@@ -211,9 +229,10 @@ class StateManager {
 
     renderKey(key, shape) {
         this.pad.col(shape.pad, key);
+        this.store();
     }
 
-    async render() { // renders the current internal state onto pad
+    render() { // renders the current internal state onto pad
         const arr = [];
 
         const grid = this.grid;
@@ -227,6 +246,10 @@ class StateManager {
         }
 
         this.pad.setColors(arr);
+
+        this.store();
+
+
     }
 
 
@@ -294,6 +317,9 @@ class StateManager {
         }
         this.grid = grid;
 
+
+        this.storageAddress = null;
+
         this.render()
 
 
@@ -306,6 +332,31 @@ class StateManager {
             minute: () => { },
         }
     }
+
+
+
+
+    // storage
+    setStorageAddress(address) {
+        this.storageAddress = address;
+    }
+
+    async store() {
+        const address = this.storageAddress;
+        if (!address) return;
+        const data = JSON.stringify(this.grid);
+        localStorage.setItem(address, data);
+    }
+
+    getStorage() {
+        const address = this.storageAddress;
+        if (!address) return null;
+        const store = localStorage.getItem(address);
+        if (!store) return null;
+        const data = JSON.parse(store);
+        return data;
+    }
+
 }
 
 

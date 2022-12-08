@@ -37,8 +37,8 @@ class ClockView {
         let date = new Date();
         let h = "" + date.getHours();
         let m = "" + date.getMinutes();
-        if (h < 10) "0" + h;
-        if (m < 10) "0" + m;
+        h = h.padStart(2, '0');
+        m = m.padStart(2, '0');
 
         if (this.time.h !== h || this.time.m !== m) {
             this.time = { h, m };
@@ -89,6 +89,7 @@ class ClockView {
 
 
 function connectGridsX(a, b) {
+    if (!a || !b) return
     let c = [];
     for (const i in a) {
         if (Object.hasOwnProperty.call(a, i) && Object.hasOwnProperty.call(b, i)) {
@@ -103,6 +104,7 @@ function connectGridsX(a, b) {
 
 
 function connectGridsY(a, b) {
+    if (!a || !b) return
     const c = [...b, ...a];
     return c;
 }

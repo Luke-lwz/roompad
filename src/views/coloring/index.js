@@ -12,7 +12,8 @@ class ColoringView {
     }
 
     mount() {
-        this.state.setGrid(this.state.getPrefabGrid({ id: 0, onClick: (data) => this.onClick(data) })) // fills grid with clickable keys
+        this.state.setStorageAddress("coloring")
+        this.state.setGrid(this.state.getPrefabGrid({ id: 0, onClick: (data) => this.onClick(data) }), { restore: true }) // fills grid with clickable keys
         this.toolbar.setToolbar(this.getToolbar())
     }
 
