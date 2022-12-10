@@ -2,8 +2,11 @@ import digitalClockNumbers from "./digitalClockNumbers.js";
 
 
 class ClockView {
-    constructor(state) {
+    constructor(state, toolbar, settings, func) {
         this.state = state;
+        this.toolbar = toolbar;
+        this.settings = settings;
+        this.func = func;
 
         this.time = { h: null, m: null };
     }
@@ -11,6 +14,7 @@ class ClockView {
     mount() {
         this.clock()
         this.state.setIntervalFunction("second", () => this.clock())
+        this.loadToolbar();
     }
 
     onClick() {
@@ -19,6 +23,12 @@ class ClockView {
 
     onToolbarClick() {
 
+    }
+
+    loadToolbar() {
+        const toolbar = this.toolbar.getPrefabToolbar();
+        toolbar[0] = { id: 6, onClick: (key) => this.changeNightMode(key) }
+        this.toolbar.setToolbar(toolbar);
     }
 
 
@@ -80,6 +90,13 @@ class ClockView {
         function replaceBrightnessWithColorValue(row, color) {
             return row.map(e => (e === 0 ? null : (color - (3 - e))));
         }
+    }
+
+
+
+    changeNightMode(key) {
+        if (key.up) return;
+        this.func.toggleNightMode();
     }
 
 

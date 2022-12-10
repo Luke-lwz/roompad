@@ -1,8 +1,10 @@
 import localStorage from "../localStorage/localStorage.js";
 
 class StateManager {
-    constructor(pad) {
+    constructor(pad, settings) {
+        this.settings = settings;
         this.pad = pad
+
         this.brightnessNameArray = ["low", "low", "medium", "full"];
 
         this.shapes = [ // every dataset in here is a shape
@@ -203,6 +205,16 @@ class StateManager {
 
 
     getShapeFromId(id) {
+
+        if (this.settings.nightmode) { // if there is nightmode turned on return lowest brightness value, regardless 
+            let shape = this.shapes[id] || this.shapes[0];
+            const shapesWithMatchingColor = this.shapes.filter(e => e.color === shape.color);
+            if (shapesWithMatchingColor[0]) {
+                return shapesWithMatchingColor[0] // lowest brightness shape
+            }
+        }
+
+
         return this.shapes[id] || this.shapes[0];
     }
 

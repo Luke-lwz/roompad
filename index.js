@@ -58,10 +58,62 @@ const NAV = [
 let currentRoute = "/clock";
 
 
+let settings = {
+    nightmode: false,
+    nightmodestart: 22,
+    nightmodeend: 7
+}
+
+
 const pad = new Launchpad();
-const state = new StateManager(pad);
-const toolbar = new ToolbarStateManager(pad);
-const navbar = new NavbarStateManager(pad);
+const state = new StateManager(pad, settings);
+const toolbar = new ToolbarStateManager(pad, settings);
+const navbar = new NavbarStateManager(pad, settings);
+
+
+
+
+const func = { // functions for views to cummunicate with outside
+    toggleNightMode: (forceState) => {
+        settings.nightmode = (forceState ? forceState : !settings.nightmode)
+
+        state.render();
+        toolbar.render();
+        navbar.render();
+
+        return settings.nightmode;
+    }
+}
+
+
+
+
+
+
+
+async function main() {
+    searchPadMode()
+
+    // Intervals 
+    let currentIntervalHour = null;
+    setInterval(() => { // nightmode interval
+        let date = new Date();
+        let h = date.getHours();
+
+        if (h !== currentIntervalHour) {
+            currentIntervalHour = h;
+            if (h === settings.nightmodestart) func.toggleNightMode(true);
+            else if (h === settings.nightmodeend) func.toggleNightMode(false);
+        }
+
+        
+    }, 1 * 1000)
+
+
+    
+}
+main();
+
 
 
 
@@ -150,7 +202,7 @@ async function launch() {
             const viewData = getViewData(currentRoute);
 
 
-            const view = new viewData.view(state, toolbar);
+            const view = new viewData.view(state, toolbar, settings, func);
 
             view.mount();
 
@@ -186,5 +238,5 @@ function searchPadMode() {
 
 
 
-searchPadMode()
+
 

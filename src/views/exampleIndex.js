@@ -1,7 +1,9 @@
 class ExampleView {
-    constructor(state, toolbar) {
+    constructor(state, toolbar, settings, func) {
         this.state = state;
         this.toolbar = toolbar;
+        this.settings = settings;
+        this.func = func;
     }
 
     mount() {
@@ -27,7 +29,7 @@ class ExampleView {
 
     // code
 
-    
+
 }
 
 export default ExampleView
