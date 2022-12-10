@@ -29,7 +29,10 @@ const VIEWS = [
     },
     {
         route: "/coloring",
-        view: ColoringView
+        view: ColoringView,
+        settings: { // overwrites any settings and will apply while view is active (afterwards will revert back to original)
+            nightmode: false,
+        }
     },
 
     {
@@ -58,11 +61,17 @@ const NAV = [
 let currentRoute = "/clock";
 
 
-let settings = {
+const originalSettings = {
     nightmode: false,
     nightmodestart: 22,
     nightmodeend: 7
 }
+
+let revertSettings = JSON.parse(JSON.stringify(originalSettings));
+
+let settings = JSON.parse(JSON.stringify(originalSettings));
+
+
 
 
 const pad = new Launchpad();
@@ -75,13 +84,55 @@ const navbar = new NavbarStateManager(pad, settings);
 
 const func = { // functions for views to cummunicate with outside
     toggleNightMode: (forceState) => {
-        settings.nightmode = (forceState ? forceState : !settings.nightmode)
+        let nightmode = (forceState ? forceState : !settings.nightmode)
+
+        func.applySettings({ nightmode });
+
+        return nightmode;
+    },
+    applySettings: (overwrites) => { // applies settings
+        if (overwrites) {
+            for (const setting in overwrites) {
+                if (Object.hasOwnProperty.call(overwrites, setting)) {
+                    const element = overwrites[setting];
+                    settings[setting] = element;
+                    revertSettings[setting] = element;
+                }
+            }
+        } else {
+            for (const setting in revertSettings) {
+                if (Object.hasOwnProperty.call(revertSettings, setting)) {
+                    const element = revertSettings[setting];
+                    settings[setting] = element;
+                }
+            }
+            revertSettings = settings;
+        }
 
         state.render();
         toolbar.render();
         navbar.render();
+    },
+    applyTempSettings: (overwrites) => { // will apply settings temporarily, until this function or func.applySettings(undefined) is called again
+        if (overwrites) {
+            for (const setting in overwrites) {
+                if (Object.hasOwnProperty.call(overwrites, setting)) {
+                    const element = overwrites[setting];
+                    settings[setting] = element;
+                }
+            }
+        } else {
+            for (const setting in revertSettings) {
+                if (Object.hasOwnProperty.call(revertSettings, setting)) {
+                    const element = revertSettings[setting];
+                    settings[setting] = element;
+                }
+            }
+        }
 
-        return settings.nightmode;
+        state.render();
+        toolbar.render();
+        navbar.render();
     }
 }
 
@@ -106,11 +157,11 @@ async function main() {
             else if (h === settings.nightmodeend) func.toggleNightMode(false);
         }
 
-        
+
     }, 1 * 1000)
 
 
-    
+
 }
 main();
 
@@ -202,6 +253,9 @@ async function launch() {
             const viewData = getViewData(currentRoute);
 
 
+            func.applyTempSettings(viewData?.settings);
+
+
             const view = new viewData.view(state, toolbar, settings, func);
 
             view.mount();
@@ -233,6 +287,8 @@ function searchPadMode() {
 
     }, 1 * 1000)
 }
+
+
 
 
 
