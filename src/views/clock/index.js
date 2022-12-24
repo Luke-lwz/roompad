@@ -1,20 +1,38 @@
 import digitalClockNumbers from "./digitalClockNumbers.js";
 
 
+
+
+let hueDataRefreshInterval = 7; // seconds
+let hueDataRefreshCooldown = hueDataRefreshInterval;
+
+
 class ClockView {
-    constructor(state, toolbar, settings, func) {
+    constructor(state, toolbar, settings, func, util) {
         this.state = state;
         this.toolbar = toolbar;
         this.settings = settings;
         this.func = func;
+        this.util = util;
 
         this.time = { h: null, m: null };
+
     }
 
     mount() {
+        this.asyncMount();
         this.clock()
-        this.state.setIntervalFunction("second", () => this.clock())
+        this.state.setIntervalFunction("second", () => this.onSecondInterval())
         this.loadToolbar();
+
+
+
+    }
+
+    async asyncMount() {
+
+
+        this.loadLightControls();
     }
 
     onClick() {
@@ -25,8 +43,21 @@ class ClockView {
 
     }
 
-    loadToolbar() {
-        const toolbar = this.toolbar.getPrefabToolbar();
+    onSecondInterval() {
+        this.clock();
+
+
+        // hue
+        if (hueDataRefreshCooldown <= 0) {
+            this.loadLightControls();
+            hueDataRefreshCooldown = hueDataRefreshInterval;
+        } else {
+            hueDataRefreshCooldown--;
+        }
+    }
+
+    loadToolbar(prefab) {
+        const toolbar = (prefab ? prefab : this.toolbar.getPrefabToolbar());
         toolbar[0] = { id: 6, onClick: (key) => this.changeNightMode(key) }
         this.toolbar.setToolbar(toolbar);
     }
@@ -101,6 +132,52 @@ class ClockView {
 
 
 
+    // lights
+
+
+    async loadLightControls() {
+        let hue = this.util.hue;
+        if (!hue) return
+
+        const groups = await hue.groups.getAll();
+
+        const arr = this.toolbar.getPrefabToolbar();
+
+        for (let i = 0; i < groups.length; i++) {
+            let group = groups[i];
+
+            arr[(arr.length - (i + 1))] = {
+                id: (group.on ? 3 : 12),
+                onClick: (k) => this.onHueGroupClick(k, group)
+            }
+        }
+
+
+        this.loadToolbar(arr);
+    }
+
+
+    async onHueGroupClick(k, group) {
+        if (k.up) return
+        let hue = this.util.hue;
+        if (!hue) return
+
+
+        hue.groups.getById(group.id)
+            .then(fetchedGroup => {
+                fetchedGroup.on = !group.on
+
+                // save
+                hue.groups.save(fetchedGroup);
+
+                // load
+                return this.loadLightControls();
+            })
+            .catch(error => {});
+    }
+
+
+
 
 }
 
@@ -112,7 +189,7 @@ function connectGridsX(a, b) {
         if (Object.hasOwnProperty.call(a, i) && Object.hasOwnProperty.call(b, i)) {
             const rowA = a[i];
             const rowB = b[i];
-            c = [[...rowA, ...rowB], ...c];
+            c = [...c, [...rowA, ...rowB]];
         }
     }
 
@@ -122,7 +199,7 @@ function connectGridsX(a, b) {
 
 function connectGridsY(a, b) {
     if (!a || !b) return
-    const c = [...b, ...a];
+    const c = [...a, ...b];
     return c;
 }
 

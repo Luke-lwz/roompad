@@ -1,7 +1,9 @@
+import { getPrefabGrid, loopGrid } from "../../../helpers/layers.js";
+
 
 const FIELDGRIDUNIFIER = [ // give x and y and return a and b
     {
-        fieldCoors: { "0": 0, "1": 0, a: 0, b: 0 },
+        fieldCoors: { "0": 2, "1": 0, a: 2, b: 0 },
         gridCoors: [
             [0, 0],
             [0, 1],
@@ -10,7 +12,7 @@ const FIELDGRIDUNIFIER = [ // give x and y and return a and b
         ]
     },
     {
-        fieldCoors: { "0": 0, "1": 1, a: 0, b: 1 },
+        fieldCoors: { "0": 2, "1": 1, a: 2, b: 1 },
         gridCoors: [
             [0, 4],
             [0, 3],
@@ -19,7 +21,7 @@ const FIELDGRIDUNIFIER = [ // give x and y and return a and b
         ]
     },
     {
-        fieldCoors: { "0": 0, "1": 2, a: 0, b: 2 },
+        fieldCoors: { "0": 2, "1": 2, a: 2, b: 2 },
         gridCoors: [
             [0, 6],
             [0, 7],
@@ -57,7 +59,7 @@ const FIELDGRIDUNIFIER = [ // give x and y and return a and b
     },
 
     {
-        fieldCoors: { "0": 2, "1": 0, a: 2, b: 0 },
+        fieldCoors: { "0": 0, "1": 0, a: 0, b: 0 },
         gridCoors: [
             [6, 0],
             [7, 0],
@@ -66,7 +68,7 @@ const FIELDGRIDUNIFIER = [ // give x and y and return a and b
         ]
     },
     {
-        fieldCoors: { "0": 2, "1": 1, a: 2, b: 1 },
+        fieldCoors: { "0": 0, "1": 1, a: 0, b: 1 },
         gridCoors: [
             [7, 4],
             [7, 3],
@@ -75,7 +77,7 @@ const FIELDGRIDUNIFIER = [ // give x and y and return a and b
         ]
     },
     {
-        fieldCoors: { "0": 2, "1": 2, a: 2, b: 2 },
+        fieldCoors: { "0": 0, "1": 2, a: 0, b: 2 },
         gridCoors: [
             [6, 6],
             [6, 7],
@@ -126,6 +128,8 @@ class TicTacToeGameView {
         if (key.up) return
         const tile = getFieldCoor(key.x, key.y);
 
+        console.log(tile)
+
         const field = this.getCurrentField();
         if (field[tile.a][tile.b] === 0) {
             field[tile.a][tile.b] = this.currentPlayer;
@@ -160,20 +164,18 @@ class TicTacToeGameView {
     loadGrid() {
 
 
-        let newGrid = [
-            [], [], [], [], [], [], [], [],
-        ]
+        let newGrid = getPrefabGrid();
 
-        for (let x = 0; x <= 7; x++) {
-            for (let y = 0; y <= 7; y++) {
-                const tile = getFieldCoor(x, y);
-                if (tile) {
-                    let value = this.getShapeOfTile(tile);
-                    newGrid[x].push(value);
-                } else newGrid[x].push({ id: 6 });
-            }
+        loopGrid(newGrid, (data, x, y) => {
+            const tile = getFieldCoor(x, y);
+            console.log(tile)
+            if (tile) {
+                let value = this.getShapeOfTile(tile);
+                newGrid[x][y] = value;
+            } else newGrid[x][y] = { id: 6 };
+        })
 
-        }
+
 
 
         this.state.setGrid(newGrid);
@@ -223,7 +225,7 @@ class TicTacToeGameView {
 
 
     checkEnd() {
-        
+
     }
 
 
@@ -294,7 +296,8 @@ function getFieldCoor(x, y) {// returns field coordinates a, b or null
         return false;
     })?.[0];
 
-    return fieldgridunit?.fieldCoors;
+
+    return fieldgridunit?.fieldCoors || null;
 
 }
 

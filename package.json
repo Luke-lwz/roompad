@@ -19,10 +19,13 @@
   "homepage": "https://github.com/Luke-lwz/roompad#readme",
   "dependencies": {
     "@vliegwerk/novation": "^1.0.1",
+    "huejay": "^0.18.0",
     "launchpad-mini": "^2.3.3",
     "midi": "^2.0.0",
     "node-fetch": "^3.3.0",
-    "node-localstorage": "^2.2.1"
+    "node-localstorage": "^2.2.1",
+    "spotify-locally": "^0.2.2",
+    "weather-js": "^2.0.0"
   },
   "type": "module"
 }

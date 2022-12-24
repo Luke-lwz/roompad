@@ -3,15 +3,16 @@ import Launchpad from "launchpad-mini";
 import fetch from "node-fetch";
 import PressedInView, { PressedInToolbar, PressedInNavbar } from "./src/helpers/PressedHelper.js";
 
+
+import getHueClient from "./src/smarthome/hue.js";
+
 import StateManager from "./src/helpers/StateManager.js";
 import ToolbarStateManager from "./src/helpers/ToolbarStateManager.js";
 import NavbarStateManager from "./src/helpers/NavbarStateManager.js";
 
 // views 
-
-
-
 import ClockView from "./src/views/clock/index.js";
+import TemperatureView from "./src/views/temperature/index.js";
 import ColoringView from "./src/views/coloring/index.js";
 
 // game vies
@@ -26,6 +27,10 @@ const VIEWS = [
     {
         route: "/clock",
         view: ClockView
+    },
+    {
+        route: "/temperature",
+        view: TemperatureView,
     },
     {
         route: "/coloring",
@@ -48,6 +53,10 @@ const NAV = [
         route: "/clock"
     },
     {
+        name: "Temperature",
+        route: "/temperature"
+    },
+    {
         name: "Coloring",
         route: "/coloring"
     },
@@ -59,6 +68,11 @@ const NAV = [
 
 
 let currentRoute = "/clock";
+
+
+const util = {
+    hue: null
+}
 
 
 const originalSettings = {
@@ -144,6 +158,7 @@ const func = { // functions for views to cummunicate with outside
 
 async function main() {
     searchPadMode()
+    loadHue();
 
     // Intervals 
     let currentIntervalHour = null;
@@ -172,7 +187,7 @@ pad.on('key', k => {
 
     // Make button red while pressed, green after pressing
     PressedInView(k, (key) => {
-        // if (key.down) console.log(k.x, k.y)
+        if (key.down) console.log(k.x, k.y)
         state.onClick(key);
 
 
@@ -191,15 +206,14 @@ pad.on('key', k => {
 
 
 async function launch() {
-    pad.connect().then(() => {
 
+    pad.connect().then(() => {
         // INIT
         loadView();
         loadNavbar();
 
         const interval = setInterval(() => { // checks if no board connected and goes into searchPadMode mode
             const ports = pad.availablePorts;
-
             if (ports?.input?.length <= 0 || ports?.output?.length <= 0) {
                 clearInterval(interval)
                 pad.disconnect()
@@ -256,7 +270,7 @@ async function launch() {
             func.applyTempSettings(viewData?.settings);
 
 
-            const view = new viewData.view(state, toolbar, settings, func);
+            const view = new viewData.view(state, toolbar, settings, func, util);
 
             view.mount();
 
@@ -286,6 +300,25 @@ function searchPadMode() {
         };
 
     }, 1 * 1000)
+}
+
+
+
+
+function loadHue() {
+    const interval = setInterval(() => {
+        loadHueClient(interval);
+    }, 10 * 1000)
+
+   
+}
+
+async function loadHueClient(interval) {
+    let client = await getHueClient();
+    if (client && !util.hue) {
+        clearInterval(interval);
+        return util.hue = client;
+    }
 }
 
 

@@ -177,7 +177,7 @@ class StateManager {
         const shape = this.getShapeFromId(data.id);
 
         // set in state 
-        this.grid[key[0]][key[1]] = { id: shape.id, onClick: data.onClick };
+        this.grid[Math.abs(key[0] - 7)][key[1]] = { id: shape.id, onClick: data.onClick };
 
 
         this.renderKey(key, shape)
@@ -192,7 +192,7 @@ class StateManager {
 
         // set in state 
         const keyState = this.getKey(key);
-        this.grid[key[0]][key[1]] = { id, onClick: keyState.onClick };
+        this.grid[Math.abs(key[0] - 7)][key[1]] = { id, onClick: keyState.onClick };
 
 
         this.renderKey(key, shape)
@@ -252,7 +252,7 @@ class StateManager {
             for (let y = 0; y < grid[x].length; y++) {
                 let keyState = grid[x][y];
                 let shape = this.getShapeFromId(keyState.id);
-                arr.push([x, y, shape.pad]);
+                arr.push([Math.abs(x - 7), y, shape.pad]);
             }
 
         }
@@ -267,23 +267,6 @@ class StateManager {
 
 
 
-    // LAYERED RENDERING
-    combineLayers(layers) { //[grid, grid, ...]
-        let finalGrid = [
-            [], [], [], [], [], [], [], [],
-        ]
-
-        for (let i = 0; i < layers.length; i++) {
-            const grid = layers[i];
-            this.loopGrid(grid, (data, x, y) => {
-                if (data) {
-                    finalGrid[x][y] = data;
-                }
-            })
-        }
-
-
-    }
 
 
 
