@@ -10,20 +10,20 @@ export function loopGrid(grid, callback) {  // callback will be (data, x, y)
 
 
 
-export function combineLayers(layers) { //[grid, grid, ...]
-    let finalGrid = [
-        [], [], [], [], [], [], [], [],
-    ]
+export function flattenLayers(layers) { //[grid, grid, ...]
+    let finalGrid = getPrefabGrid()
 
     for (let i = 0; i < layers.length; i++) {
-        const grid = layers[i];
+        let grid = layers[i];
         loopGrid(grid, (data, x, y) => {
-            if (data) {
+            if (data && data !== null) {
                 finalGrid[x][y] = data;
             }
         })
     }
 
+
+    return finalGrid;
 
 }
 
@@ -34,8 +34,8 @@ export function margin(component, m = {}) {
     let grid = getPrefabGrid();
 
     loopGrid(grid, (data, a, b) => {
-        const j = a + m.x,
-            k = b + m.y; // moved coordinates
+        const j = a - m.x,
+            k = b - m.y; // moved coordinates
 
         let componentData = component?.[j]?.[k];
         if (j >= 0 && k >= 0 && componentData) {

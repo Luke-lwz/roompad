@@ -1,4 +1,4 @@
-import weather from "weather-js";
+
 
 //Components
 import DegreeDisplay from "../../components/DegreeDisplay.js";
@@ -43,14 +43,13 @@ class TemperatureView {
 
 
     temperature() {
-        weather.find({ search: 'Landau in der Pfalz, Germany', degreeType: 'C' }, (err, result) => {
-            if (err) return
+        const { weather } = this.util;
+        if (!weather?.current?.temperature) return
 
-            console.log(result);
+        const temp = weather.current.temperature;
 
 
-            this.state.setGrid(DegreeDisplay())
-        });
+        this.state.setGrid(DegreeDisplay(temp));
     }
 
 }

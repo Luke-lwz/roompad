@@ -1,6 +1,10 @@
 import Launchpad from "launchpad-mini";
 
+// Librarys
 import fetch from "node-fetch";
+import weather from "weather-js";
+
+
 import PressedInView, { PressedInToolbar, PressedInNavbar } from "./src/helpers/PressedHelper.js";
 
 
@@ -60,10 +64,10 @@ const NAV = [
         name: "Coloring",
         route: "/coloring"
     },
-    {
-        name: "Tic Tac Toe",
-        route: "/games/tictactoe"
-    },
+    // {
+    //     name: "Tic Tac Toe",
+    //     route: "/games/tictactoe"
+    // },
 ]
 
 
@@ -71,7 +75,8 @@ let currentRoute = "/clock";
 
 
 const util = {
-    hue: null
+    hue: null,
+    weather: null,
 }
 
 
@@ -177,6 +182,23 @@ async function main() {
 
 
 
+
+    // Weather
+    getWeather();
+    setInterval(() => getWeather(), 5 * 60 * 1000);
+
+    function getWeather() {
+        weather.find({ search: 'Landau in der Pfalz, Germany', degreeType: 'C' }, (err, result) => {
+            if (err) return
+
+
+            util.weather = result[0];
+
+        });
+    }
+
+
+
 }
 main();
 
@@ -187,7 +209,7 @@ pad.on('key', k => {
 
     // Make button red while pressed, green after pressing
     PressedInView(k, (key) => {
-        if (key.down) console.log(k.x, k.y)
+        // if (key.down) console.log(k.x, k.y)
         state.onClick(key);
 
 
