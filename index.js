@@ -2,7 +2,8 @@ import Launchpad from "launchpad-mini";
 
 // Librarys
 import fetch from "node-fetch";
-import weather from "weather-js";
+import { OpenWeatherAPI } from "openweather-api-node";
+
 
 
 import PressedInView, { PressedInToolbar, PressedInNavbar } from "./src/helpers/PressedHelper.js";
@@ -23,9 +24,12 @@ import ColoringView from "./src/views/coloring/index.js";
 import TicTacToeGameView from "./src/views/games/tictactoe/index.js";
 
 
+let weather = new OpenWeatherAPI({
+    key: "a6c589533af628dfe5aee1aa0a216021",
+    units: "metric"
+})
 
-
-
+weather.setLocationByCoordinates(49, 8)
 
 const VIEWS = [
     {
@@ -163,7 +167,7 @@ const func = { // functions for views to cummunicate with outside
 
 async function main() {
     searchPadMode()
-    loadHue();
+    // loadHue();
 
     // Intervals 
     let currentIntervalHour = null;
@@ -188,13 +192,9 @@ async function main() {
     setInterval(() => getWeather(), 5 * 60 * 1000);
 
     function getWeather() {
-        weather.find({ search: 'Landau in der Pfalz, Germany', degreeType: 'C' }, (err, result) => {
-            if (err) return
-
-
-            util.weather = result[0];
-
-        });
+        weather.getCurrent().then(data => {
+            console.log(`Current temperature in New York is: ${data.weather.temp.cur}\u00B0F`)
+        })
     }
 
 
@@ -332,7 +332,7 @@ function loadHue() {
         loadHueClient(interval);
     }, 10 * 1000)
 
-   
+
 }
 
 async function loadHueClient(interval) {
