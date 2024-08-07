@@ -24,22 +24,22 @@ import ColoringView from "./src/views/coloring/index.js";
 import TicTacToeGameView from "./src/views/games/tictactoe/index.js";
 
 
-let weather = new OpenWeatherAPI({
-    key: "a6c589533af628dfe5aee1aa0a216021",
-    units: "metric"
-})
+// let weather = new OpenWeatherAPI({
+//     key: "a6c589533af628dfe5aee1aa0a216021",
+//     units: "metric"
+// })
 
-weather.setLocationByCoordinates(49, 8)
+// weather.setLocationByCoordinates(49, 8)
 
 const VIEWS = [
     {
         route: "/clock",
         view: ClockView
     },
-    {
-        route: "/temperature",
-        view: TemperatureView,
-    },
+    // {
+    //     route: "/temperature",
+    //     view: TemperatureView,
+    // },
     {
         route: "/coloring",
         view: ColoringView,
@@ -188,8 +188,8 @@ async function main() {
 
 
     // Weather
-    getWeather();
-    setInterval(() => getWeather(), 5 * 60 * 1000);
+    // getWeather();
+    // setInterval(() => getWeather(), 5 * 60 * 1000);
 
     function getWeather() {
         weather.getCurrent().then(data => {
