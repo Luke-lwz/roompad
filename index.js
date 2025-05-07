@@ -48,10 +48,10 @@ const VIEWS = [
         }
     },
 
-    {
-        route: "/games/tictactoe",
-        view: TicTacToeGameView
-    },
+    // {
+    //     route: "/games/tictactoe",
+    //     view: TicTacToeGameView
+    // },
 ]
 
 
@@ -60,10 +60,10 @@ const NAV = [
         name: "Clock",
         route: "/clock"
     },
-    {
-        name: "Temperature",
-        route: "/temperature"
-    },
+    // {
+    //     name: "Temperature",
+    //     route: "/temperature"
+    // },
     {
         name: "Coloring",
         route: "/coloring"
