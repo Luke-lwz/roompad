@@ -1,37 +1,51 @@
-# Use official Ubuntu base image
-FROM ubuntu:20.04
+# 1. Official Node.js 14 (Debian Bullseye)
+FROM node:14-bullseye
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
+# 2. Non-interactive APT (avoid prompts)
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
-# Install curl and other dependencies for Node.js
-RUN apt-get update && apt-get install -y \
-    curl \
-    ca-certificates \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
+# 3. Install system dependencies for native modules and legacy Python 2
+#    - build-essential: gcc, g++, make for native builds
+#    - python2.7 & python2.7-dev: legacy Python 2.7 and headers for node-gyp
+#    - python-is-python2: symlink /usr/bin/python → python2.7 for compatibility
+#    - libasound2-dev: ALSA headers for MIDI support
+#    - libudev-dev: hardware access
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+       build-essential \
+       python2.7 \
+       python2.7-dev \
+       python-is-python2 \
+       libasound2-dev \
+       libudev-dev \
+       ca-certificates \
+       curl \
+       gnupg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Add NodeSource for Node.js 14
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-
-# Install Node.js
-RUN apt-get update && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create app directory
+# 4. Create & set workdir Create & set workdir
 WORKDIR /usr/src/app
 
-# Copy package files first to leverage Docker cache
+# 5. Copy package manifests and install dependencies
 COPY package*.json ./
-
-# Install app dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
+# 6. Copy application source
+COPY . ./
 
-# Expose app port (optional, if your app uses a specific port)
+# 7. Expose any ports if your service listens
 # EXPOSE 3000
 
-# Run the application
+# 8. Default command: start Node.js app
+#
+# Note: ALSA sequencer device access must be enabled at runtime via Docker options.
+# For example:
+#   docker build -t roompad .
+#   docker run -it --rm \
+#     --device /dev/snd:/dev/snd \
+#     --group-add $(getent group audio | cut -d: -f3) \
+#     roompad
+
 CMD ["node", "."]
