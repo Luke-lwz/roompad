@@ -11,7 +11,7 @@ lp.onMessage = async (deviceName, message) => {
   console.log(`Device ${deviceName}: note=${note}, velocity=${velocity}, status=${status}`);
 
   // Flash pad when pressed
-  if (status === 144 && velocity > 0) {
+  if ((status === 144 || status === 176) && velocity > 0) {
 
     // for (let i = 48; i <= 127; i++) {
     //   lp.lightPad(deviceName, note, i);
