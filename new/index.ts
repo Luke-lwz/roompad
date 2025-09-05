@@ -12,7 +12,7 @@ function renderDigit(
   digit: number,
   xOffset: number,
   yOffset: number,
-  color: typeof Color.green | typeof Color.amber
+  color: typeof Color.green | typeof Color.red
 ) {
   const grid = getDigitGrid(digit);
   const now = new Date();
@@ -52,12 +52,12 @@ function renderClock(deviceName: string) {
   const minutes = now.getMinutes().toString().padStart(2, "0");
   const digits = [...hours, ...minutes].map((d) => parseInt(d, 10));
 
-  const positions: [number, number, typeof Color.green | typeof Color.amber][] =
+  const positions: [number, number, typeof Color.green | typeof Color.red][] =
     [
       [0, 0, Color.green], // hour tens (green)
       [4, 0, Color.green], // hour ones (green)
-      [0, 4, Color.amber], // minute tens (red)
-      [4, 4, Color.amber], // minute ones (red)
+      [0, 4, Color.red], // minute tens (red)
+      [4, 4, Color.red], // minute ones (red)
     ];
 
   if (!lastDigits) {
