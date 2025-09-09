@@ -2,7 +2,7 @@ import { LaunchpadManager } from "./LaunchpadManager";
 import { Color } from "./Colors";
 import digitalClockNumbers from "./digitalClockNumbers";
 
-const lp = new LaunchpadManager(90);
+const lp = new LaunchpadManager(0);
 
 function getDigitGrid(num: number) {
   return digitalClockNumbers.find((n) => n.number === num)?.minigrid ?? [];
