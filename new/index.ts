@@ -7,6 +7,7 @@ const lp = new LaunchpadManager(0);
 function getDigitGrid(num: number) {
   return digitalClockNumbers.find((n) => n.number === num)?.minigrid ?? [];
 }
+
 function renderDigit(
   deviceName: string,
   digit: number,
@@ -15,21 +16,13 @@ function renderDigit(
   color: typeof Color.green | typeof Color.red
 ) {
   const grid = getDigitGrid(digit);
-  const now = new Date();
-  const hour = now.getHours();
-  const nightMode = hour >= 22 || hour < 8; // 22:00–08:00
 
   for (let y = 0; y < 4; y++) {
     for (let x = 0; x < 4; x++) {
       const brightnessName = grid[y][x]; // "off" | "low" | "med" | "high"
 
-      let velocity =
+      const velocity =
         brightnessName === "off" ? Color.off : color[brightnessName];
-
-      if (nightMode && velocity !== Color.off) {
-        // overwrite to low during night
-        velocity = color.low;
-      }
 
       lp.lightPadAt(deviceName, x + xOffset, y + yOffset, velocity);
     }
@@ -44,11 +37,35 @@ function clearDigit(deviceName: string, xOffset: number, yOffset: number) {
   }
 }
 
+function clearAll(deviceName: string) {
+  // Clear full 8x8 Launchpad
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      lp.lightPadAt(deviceName, x, y, Color.off);
+    }
+  }
+}
+
 let lastDigits: number[] | null = null;
+let lastNightMode: boolean | null = null;
 
 function renderClock(deviceName: string) {
   const now = new Date();
-  const hours = now.getHours().toString().padStart(2, "0");
+  const hour = now.getHours();
+  const nightMode = hour >= 22 || hour < 8; // 22:00–08:00
+
+  if (nightMode) {
+    if (!lastNightMode) {
+      // only clear once when entering nightmode
+      clearAll(deviceName);
+    }
+    lastNightMode = true;
+    return;
+  } else {
+    lastNightMode = false;
+  }
+
+  const hours = hour.toString().padStart(2, "0");
   const minutes = now.getMinutes().toString().padStart(2, "0");
   const digits = [...hours, ...minutes].map((d) => parseInt(d, 10));
 
@@ -56,8 +73,8 @@ function renderClock(deviceName: string) {
     [
       [0, 0, Color.green], // hour tens (green)
       [4, 0, Color.green], // hour ones (green)
-      [0, 4, Color.red], // minute tens (red)
-      [4, 4, Color.red], // minute ones (red)
+      [0, 4, Color.red],   // minute tens (red)
+      [4, 4, Color.red],   // minute ones (red)
     ];
 
   if (!lastDigits) {
