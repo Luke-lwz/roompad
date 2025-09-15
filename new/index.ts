@@ -47,22 +47,17 @@ function clearAll(deviceName: string) {
 }
 
 let lastDigits: number[] | null = null;
-let lastNightMode: boolean | null = null;
+
+
 
 function renderClock(deviceName: string) {
   const now = new Date();
   const hour = now.getHours();
-  const nightMode = hour >= 22 || hour < 8; // 22:00–08:00
+  const nightMode =  hour < 8 || hour >= 22;
 
   if (nightMode) {
-    if (!lastNightMode) {
-      // only clear once when entering nightmode
-      clearAll(deviceName);
-    }
-    lastNightMode = true;
+    clearAll(deviceName);
     return;
-  } else {
-    lastNightMode = false;
   }
 
   const hours = hour.toString().padStart(2, "0");
