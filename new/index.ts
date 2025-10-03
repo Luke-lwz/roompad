@@ -57,7 +57,7 @@ let manualOverride: "day" | "night" | null = null;
 function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   const now = new Date();
   const hour = now.getHours();
-  const naturalNightMode = hour >= 22 || hour < 7; // 22:00–08:00
+  const naturalNightMode = hour >= 22 || hour < 7; // 22:00–07:00
 
   // Reset override when natural mode flips
   if (origin === "auto") {
@@ -80,7 +80,7 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
 
   if (nightMode) {
     if (!lastNightMode || manualOverride === "night") {
-      // clear once entering night mode
+      // only clear once entering *night mode*
       clearAll(deviceName);
       lastDigits = null;
     }
@@ -90,6 +90,7 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
     lastNightMode = false;
   }
 
+  // Normal clock drawing
   const hours = hour.toString().padStart(2, "0");
   const minutes = now.getMinutes().toString().padStart(2, "0");
   const digits = [...hours, ...minutes].map((d) => parseInt(d, 10));
@@ -103,28 +104,14 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
     ];
 
   if (!lastDigits) {
-    // first render — draw everything
     digits.forEach((d, i) =>
-      renderDigit(
-        deviceName,
-        d,
-        positions[i][0],
-        positions[i][1],
-        positions[i][2]
-      )
+      renderDigit(deviceName, d, positions[i][0], positions[i][1], positions[i][2])
     );
   } else {
-    // only redraw changed digits
     digits.forEach((d, i) => {
       if (d !== lastDigits![i]) {
         clearDigit(deviceName, positions[i][0], positions[i][1]);
-        renderDigit(
-          deviceName,
-          d,
-          positions[i][0],
-          positions[i][1],
-          positions[i][2]
-        );
+        renderDigit(deviceName, d, positions[i][0], positions[i][1], positions[i][2]);
       }
     });
   }
@@ -132,15 +119,14 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   lastDigits = digits;
 }
 
-// --- Tap toggles override ---
+// --- Tap only on release ---
 lp.onMessage = (event: PadEvent) => {
   const [status, note, velocity] = event.message;
 
-  // only handle release (velocity === 0)
-  if (velocity === 0) {
+  if (velocity === 0) { // release
     const now = new Date();
     const hour = now.getHours();
-    const naturalNightMode = hour >= 22 || hour < 8;
+    const naturalNightMode = hour >= 22 || hour < 7;
 
     if (manualOverride) {
       manualOverride = null; // tapping again clears override
@@ -148,10 +134,11 @@ lp.onMessage = (event: PadEvent) => {
       manualOverride = naturalNightMode ? "day" : "night";
     }
 
-    lastDigits = null; // force redraw
+    lastDigits = null; // force redraw of digits (not clearAll)
     renderClock(event.deviceName, "tap");
   }
 };
+
 
 
 
