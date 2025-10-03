@@ -134,21 +134,25 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
 
 // --- Tap toggles override ---
 lp.onMessage = (event: PadEvent) => {
-  const now = new Date();
-  const hour = now.getHours();
-  const naturalNightMode = hour >= 22 || hour < 7;
+  const [status, note, velocity] = event.message;
 
-  // Toggle depending on natural mode
-  if (manualOverride) {
-    manualOverride = null; // tapping again clears override
-  } else {
-    manualOverride = naturalNightMode ? "day" : "night";
+  // only handle release (velocity === 0)
+  if (velocity === 0) {
+    const now = new Date();
+    const hour = now.getHours();
+    const naturalNightMode = hour >= 22 || hour < 8;
+
+    if (manualOverride) {
+      manualOverride = null; // tapping again clears override
+    } else {
+      manualOverride = naturalNightMode ? "day" : "night";
+    }
+
+    lastDigits = null; // force redraw
+    renderClock(event.deviceName, "tap");
   }
-
-  // reset digits so it redraws fully after toggle
-  lastDigits = null;
-  renderClock(event.deviceName, "tap");
 };
+
 
 
 
