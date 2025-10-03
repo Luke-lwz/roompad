@@ -1,8 +1,10 @@
-import { LaunchpadManager } from "./LaunchpadManager";
+import { LaunchpadManager, PadEvent } from "./LaunchpadManager";
 import { Color } from "./Colors";
 import digitalClockNumbers from "./digitalClockNumbers";
 
 const lp = new LaunchpadManager(0);
+
+
 
 function getDigitGrid(num: number) {
   return digitalClockNumbers.find((n) => n.number === num)?.minigrid ?? [];
@@ -48,22 +50,40 @@ function clearAll(deviceName: string) {
 
 let lastDigits: number[] | null = null;
 let lastNightMode: boolean | null = null;
+let padOff = false;
 
-function renderClock(deviceName: string) {
+function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   const now = new Date();
   const hour = now.getHours();
   const nightMode = hour >= 22 || hour < 8; // 22:00–08:00
 
-  if (nightMode) {
-    if (!lastNightMode) {
-      // only clear once when entering nightmode
-      clearAll(deviceName);
-      lastDigits = null;
+
+  if (origin === "auto") {
+    // handle night mode on auto update without clearing the display (will be done when padOff is set to true)
+    if (nightMode !== lastNightMode) {
+      padOff = nightMode;
+      lastNightMode = nightMode;
+
+      if (padOff) {
+        clearAll(deviceName);
+        return;
+      }
     }
-    lastNightMode = true;
+    
+
+  } else if (origin === "tap") {
+    // toggle pad on/off on tap
+    if (padOff) {
+      padOff = false;
+    } else {
+      padOff = true;
+    }
+  }
+
+  
+  if (padOff) {
+    clearAll(deviceName);
     return;
-  } else {
-    lastNightMode = false;
   }
 
   const hours = hour.toString().padStart(2, "0");
@@ -106,6 +126,10 @@ function renderClock(deviceName: string) {
   }
 
   lastDigits = digits;
+}
+
+lp.onMessage = (event: PadEvent) => {
+  renderClock(event.deviceName, "tap");
 }
 
 setInterval(() => {
