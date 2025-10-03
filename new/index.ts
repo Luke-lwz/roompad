@@ -50,24 +50,37 @@ function clearAll(deviceName: string) {
 
 let lastDigits: number[] | null = null;
 let lastNightMode: boolean | null = null;
-let manualDayOverride = false; // NEW: track user override
+
+// NEW: track manual override ("day", "night", or null)
+let manualOverride: "day" | "night" | null = null;
 
 function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   const now = new Date();
   const hour = now.getHours();
-  const naturalNightMode = hour >= 22 || hour < 8; // 22:00–08:00
+  const naturalNightMode = hour >= 22 || hour < 7; // 22:00–08:00
 
-  // Reset override when natural night mode starts *fresh*
-  if (origin === "auto" && naturalNightMode && !lastNightMode) {
-    manualDayOverride = false;
+  // Reset override when natural mode flips
+  if (origin === "auto") {
+    if (naturalNightMode && !lastNightMode) {
+      manualOverride = null; // reset when new natural night begins
+    } else if (!naturalNightMode && lastNightMode) {
+      manualOverride = null; // reset when new natural day begins
+    }
   }
 
-  // Effective night mode depends on natural mode + override
-  const nightMode = naturalNightMode && !manualDayOverride;
+  // Decide effective mode
+  let nightMode: boolean;
+  if (manualOverride === "day") {
+    nightMode = false;
+  } else if (manualOverride === "night") {
+    nightMode = true;
+  } else {
+    nightMode = naturalNightMode;
+  }
 
   if (nightMode) {
-    if (!lastNightMode) {
-      // only clear once when entering nightmode
+    if (!lastNightMode || manualOverride === "night") {
+      // clear once entering night mode
       clearAll(deviceName);
       lastDigits = null;
     }
@@ -121,11 +134,22 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
 
 // --- Tap toggles override ---
 lp.onMessage = (event: PadEvent) => {
-  manualDayOverride = !manualDayOverride;
+  const now = new Date();
+  const hour = now.getHours();
+  const naturalNightMode = hour >= 22 || hour < 7;
+
+  // Toggle depending on natural mode
+  if (manualOverride) {
+    manualOverride = null; // tapping again clears override
+  } else {
+    manualOverride = naturalNightMode ? "day" : "night";
+  }
+
   // reset digits so it redraws fully after toggle
   lastDigits = null;
   renderClock(event.deviceName, "tap");
 };
+
 
 
 setInterval(() => {
