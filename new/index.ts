@@ -50,40 +50,31 @@ function clearAll(deviceName: string) {
 
 let lastDigits: number[] | null = null;
 let lastNightMode: boolean | null = null;
-let padOff = false;
+let manualDayOverride = false; // NEW: track user override
 
 function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   const now = new Date();
   const hour = now.getHours();
-  const nightMode = hour >= 22 || hour < 8; // 22:00–08:00
+  const naturalNightMode = hour >= 22 || hour < 8; // 22:00–08:00
 
-
-  if (origin === "auto") {
-    // handle night mode on auto update without clearing the display (will be done when padOff is set to true)
-    if (nightMode !== lastNightMode) {
-      padOff = nightMode;
-      lastNightMode = nightMode;
-
-      if (padOff) {
-        clearAll(deviceName);
-        return;
-      }
-    }
-    
-
-  } else if (origin === "tap") {
-    // toggle pad on/off on tap
-    if (padOff) {
-      padOff = false;
-    } else {
-      padOff = true;
-    }
+  // Reset override when natural night mode starts *fresh*
+  if (origin === "auto" && naturalNightMode && !lastNightMode) {
+    manualDayOverride = false;
   }
 
-  
-  if (padOff) {
-    clearAll(deviceName);
+  // Effective night mode depends on natural mode + override
+  const nightMode = naturalNightMode && !manualDayOverride;
+
+  if (nightMode) {
+    if (!lastNightMode) {
+      // only clear once when entering nightmode
+      clearAll(deviceName);
+      lastDigits = null;
+    }
+    lastNightMode = true;
     return;
+  } else {
+    lastNightMode = false;
   }
 
   const hours = hour.toString().padStart(2, "0");
@@ -128,9 +119,14 @@ function renderClock(deviceName: string, origin: "tap" | "auto" = "auto") {
   lastDigits = digits;
 }
 
+// --- Tap toggles override ---
 lp.onMessage = (event: PadEvent) => {
+  manualDayOverride = !manualDayOverride;
+  // reset digits so it redraws fully after toggle
+  lastDigits = null;
   renderClock(event.deviceName, "tap");
-}
+};
+
 
 setInterval(() => {
   if (lp.devices.length > 0) {
